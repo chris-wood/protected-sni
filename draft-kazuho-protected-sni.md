@@ -33,27 +33,36 @@ informative:
   RFC7301:
   RFC7924:
   I-D.huitema-tls-sni-encryption:
+  I.D.popov-tokbind-negotiation:
 
 --- abstract
 
-This memo introduces TLS extensions and a DNS Resource Record Type that can be used to protect attackers from obtaining the value of the Server Name Indication extension being transmitted over a Transport Layer Security (TLS) version 1.3 handshake.
+This memo introduces encrypted extensions for TLS 1.3 Client Hellos. These extensions are encrypted in part using keys obtained out-of-band. As a motivating use case, it is shown how to protect the SNI from passive eavesdroppers. A new DNS Resource Record Type for distributing out-of-band keys is described.
 
 --- middle
 
 # Introduction
 
-As discussed in SNI Encryption in TLS Through Tunneling {{I-D.huitema-tls-sni-encryption}}, it is becoming important to protect from observers the name of the server a client is attempting access.
-However, Transport Layer Security (TLS) version 1.3 {{I-D.ietf-tls-tls13}} transmits the Server Name Indication extension (([RFC6066], section 3) unencrypted.
+As discussed in SNI Encryption in TLS Through Tunneling {{I-D.huitema-tls-sni-encryption}}, it is increasingly
+important to protect information transmitted in the first Client Hello. Sensitive in the Client Hello include:
 
-This memo defines the TLS-Bootstrap DNS Resource Record and two TLS extensions: the Encrypted SNI Extension, the Semi-Static Key Share Extension, that when being used together provides a way to transmit the server name in an encrypted form. 
+- SNI {{RFC6066}}: The SNI leaks information about the target server.
+- ALPN {{RFC7301}}: The ALPN leaks information about the protocol run on top of TLS which, in turn, may leak information about specific clients or applications.
+- Cached Information {{RFC7924}}: This extension signals what information has been previously fetched by a client and may leak information about past activity.
+- Trusted CA keys {{RFC6066}}: This extension reveals information about a client's trust preferences and may be used to fingerprint a specific client. 
+- Token Binding {{I.D.popov-tokbind-negotiation}}: The TokenBinding extension may reveal information about a client configuration, such as token binding parameters and protocol version(s). 
+
+This memo defines a way to encrypt client extensions using out-of-band keys. It defines a new TLS extension -- the Semi-Static Key Share Extension -- and shows how to use this to transfer extensions in an encrypted form. It also defines a TLS-Bootstrap DNS Resource Record that can be used to distribute semi-static key shares out-of-band.
 
 ## Notational Conventions
 
-The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this document are to be interpreted as described in [RFC2119].
+The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this document are to be interpreted as described in {{RFC2119}}.
+
+<!-- caw: here -->
 
 # Protocol Overview
 
-In the proposed scheme, the server operator publishes its X.509 certificate [RFC5280] chain and a semi-static (EC)DH key using the TLS-Bootstrap DNS Record Record.
+In the proposed scheme, the server operator publishes its X.509 certificate {{RFC5280}} chain and a semi-static (EC)DH key using the TLS-Bootstrap DNS Record Record.
 
 When a client tries to access the server, it queries the DNS resolver for the TLS-Bootstrap DNS Resource Record in addition to the IP address of the server.
 The two queries can be issued simultaneously.
