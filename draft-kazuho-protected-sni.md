@@ -64,16 +64,8 @@ In the proposed scheme, the server operator publishes its X.509 certificate {{RF
 semi-static (EC)DH key via some out-of-band channel. This could be via a DNS resource record or some 
 other means. With possession of this key share, the client then initiates a TLS connection to the server
 as normal. However, all extensions are encrypted and carried in an EncryptedExtensions. The encryption key
-is derived using the server semi-static key share and the client's ephemeral key share. 
-
-
-<!-- caw -->
-
-When a client tries to access the server, it queries the DNS resolver for the TLS-Bootstrap DNS Resource 
-Record in addition to the IP address of the server. The two queries can be issued simultaneously.
-
-Once the client obtains the address of the server and also the TLS-Bootstrap DNS Resource Record, the client connects to the server and starts a TLS handshake.
-Instead of sending the Server Name Indication extension, the client will send the server name using the Encrypted SNI Extension, which is encrypted using a symmetric key derived from the result of the (EC)DH key exchange, the two (EC)DH keys being the one embedded in the TLS-Bootstrap DNS Resource Record and the other included in the KeyShare extension of the ClientHello message.
+is derived from the result of the (EC)DH key exchange, the two (EC)DH keys being the semi-static key share
+and the other included in the KeyShare extension of the ClientHello message.
 
 # TLS-Bootstrap DNS Resource Record
 
